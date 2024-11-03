@@ -1,0 +1,26 @@
+import mongoose, { model, Schema } from "mongoose";
+
+const connectionSchema = new Schema(
+  {
+    requester: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    receiver: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["idle", "pending", "accepted", "rejected"],
+      default: "idle",
+    },
+  },
+  { timestamps: true }
+);
+
+const Connection = model("Connection", connectionSchema);
+
+export default Connection;
