@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
 
-const jobSchema =
-  ({
+const jobSchema = new Schema(
+  {
     title: {
       type: String,
       required: true,
@@ -38,7 +38,8 @@ const jobSchema =
   },
   {
     timestamps: true,
-  });
+  }
+);
 
 const Job = model("Job", jobSchema);
 
