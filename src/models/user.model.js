@@ -8,6 +8,7 @@ const userSchema = new Schema(
       trim: true,
       minlength: 2,
       maxlength: 50,
+      index: true,
     },
 
     email: {
@@ -53,12 +54,6 @@ const userSchema = new Schema(
 
     location: {
       type: String,
-    },
-
-    role: {
-      type: String,
-      enum: ["user", "company"],
-      default: "user",
     },
   },
   { timestamps: true }

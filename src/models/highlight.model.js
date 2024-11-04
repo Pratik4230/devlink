@@ -13,6 +13,14 @@ const highlightSchema = new Schema(
     Image: {
       type: String,
     },
+
+    expiresAt: {
+      type: Date,
+      default: function () {
+        return Date.now() + 24 * 60 * 60 * 1000;
+      },
+      index: { expires: "0s" },
+    },
   },
   { timestamps: true }
 );

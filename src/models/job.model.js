@@ -14,10 +14,25 @@ const jobSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Company",
       required: true,
+      index: true,
     },
 
     requirements: {
       type: String,
+      required: true,
+    },
+
+    skills: {
+      type: [String],
+      required: true,
+    },
+
+    minSalary: {
+      type: Number,
+      required: true,
+    },
+    maxSalary: {
+      type: Number,
       required: true,
     },
 
@@ -34,6 +49,7 @@ const jobSchema = new Schema(
       type: String,
       enum: ["active", "closed"],
       default: "active",
+      index: true,
     },
   },
   {
