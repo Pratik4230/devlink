@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -7,8 +8,13 @@ app.use(cookieParser());
 
 // import routes
 import userRoute from "./routes/user.route.js";
-import cookieParser from "cookie-parser";
+import postRoute from "./routes/post.route.js";
+import commentRoute from "./routes/comment.route.js";
+import highlightRoute from "./routes/highlight.route.js";
 
 app.use("/user", userRoute);
+app.use("/post", postRoute);
+app.use("/comment", commentRoute);
+app.use("/highlight", highlightRoute);
 
 export default app;
