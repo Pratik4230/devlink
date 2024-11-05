@@ -21,6 +21,8 @@ const connectionSchema = new Schema(
   { timestamps: true }
 );
 
+connectionSchema.index({ requester: 1, receiver: 1 }, { unique: true });
+
 const Connection = model("Connection", connectionSchema);
 
 export default Connection;

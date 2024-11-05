@@ -11,7 +11,8 @@ const highlightSchema = new Schema(
       required: true,
     },
     Image: {
-      type: String,
+      url: { type: String, required: true },
+      public_id: { type: String, required: true },
     },
 
     expiresAt: {
@@ -19,7 +20,7 @@ const highlightSchema = new Schema(
       default: function () {
         return Date.now() + 24 * 60 * 60 * 1000;
       },
-      index: { expires: "0s" },
+      index: { expires: 0 },
     },
   },
   { timestamps: true }
