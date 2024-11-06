@@ -11,10 +11,12 @@ import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
 import commentRoute from "./routes/comment.route.js";
 import highlightRoute from "./routes/highlight.route.js";
+import likeRoute from "./routes/like.route.js";
 
 app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/comment", commentRoute);
 app.use("/highlight", highlightRoute);
+app.use("/like", likeRoute);
 
 export default app;
