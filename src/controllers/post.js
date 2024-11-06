@@ -1,5 +1,6 @@
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
+import { isValidObjectId } from "mongoose";
 
 const createPost = async (req, res) => {
   try {
@@ -44,12 +45,12 @@ const updatePost = async (req, res) => {
     const { content } = req.body;
     const { postId } = req.params;
 
-    if (!content) {
-      return res.status(400).json({ message: "Please provide content" });
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({ message: "post id is not valid" });
     }
 
-    if (!postId) {
-      return res.status(400).json({ message: "Post id is required" });
+    if (!content) {
+      return res.status(400).json({ message: "Please provide content" });
     }
 
     const post = await Post.findById(postId);
@@ -90,8 +91,8 @@ const deletePost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    if (!postId) {
-      return res.status(400).json({ message: "Post id is required" });
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({ message: "post id is not valid" });
     }
 
     const post = await Post.findById(postId);

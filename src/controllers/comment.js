@@ -1,10 +1,15 @@
 import Comment from "../models/comment.model.js";
 import Post from "../models/post.model.js";
+import { isValidObjectId } from "mongoose";
 
 const addComment = async (req, res) => {
   try {
     const { postId } = req.params;
     const { content } = req.body;
+
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({ message: "post id is not valid" });
+    }
 
     if (!content) {
       return res.status(400).json({ message: "Please provide content" });
@@ -42,6 +47,10 @@ const updateComment = async (req, res) => {
   try {
     const { commentId } = req.params;
     const { content } = req.body;
+
+    if (!isValidObjectId(commentId)) {
+      return res.status(400).json({ message: "comment id is not valid" });
+    }
 
     if (!content) {
       return res.status(400).json({ message: "Please provide content" });
@@ -117,6 +126,9 @@ const deleteComment = async (req, res) => {
 
 const getPostComments = async (req, res) => {
   const { postId } = req.params;
+  if (!isValidObjectId(postId)) {
+    return res.status(400).json({ message: "post id is not valid" });
+  }
 };
 
 export { addComment, updateComment, deleteComment };

@@ -1,5 +1,5 @@
 import Highlight from "../models/highlight.model.js";
-
+import { isValidObjectId } from "mongoose";
 import { cloudinaryUpload, cloudinaryDelete } from "../utils/cloudinary.js";
 
 const createHighlight = async (req, res) => {
@@ -52,8 +52,8 @@ const updateHighlight = async (req, res) => {
     const { highlightId } = req.params;
     const { content } = req.body;
 
-    if (!highlightId) {
-      return res.status(400).json({ message: "highlight id required" });
+    if (!isValidObjectId(highlightId)) {
+      return res.status(400).json({ message: "highlight id is not valid" });
     }
 
     if (!content) {
@@ -101,8 +101,9 @@ const deleteHighlight = async (req, res) => {
   try {
     const user = req?.user;
     const { highlightId } = req.params;
-    if (!highlightId) {
-      return res.status(400).json({ message: "Highlight id required" });
+
+    if (!isValidObjectId(highlightId)) {
+      return res.status(400).json({ message: "highlight id is not valid" });
     }
 
     const highlight = await Highlight.findById(highlightId);
