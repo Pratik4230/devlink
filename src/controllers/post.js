@@ -1,3 +1,4 @@
+import Company from "../models/company.model.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import { isValidObjectId } from "mongoose";
@@ -14,15 +15,24 @@ const createPost = async (req, res) => {
         .json({ message: "Please provide content or Image" });
     }
 
+    let authorId;
+
     const user = await User.findById(userId);
-    if (!user) {
+    if (user) {
+      authorId = user?._id;
+    }
+    const company = await Company.findById(userId);
+    if (company) {
+      authorId = company?._id;
+    }
+    if (!user && !company) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const post = new Post({
       content,
       Image,
-      author: user._id,
+      author: authorId,
     });
 
     if (!post) {

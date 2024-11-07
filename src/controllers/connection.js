@@ -1,6 +1,7 @@
 import { isValidObjectId } from "mongoose";
 import Connection from "../models/connection.model.js";
 import User from "../models/user.model.js";
+import Company from "../models/company.model.js";
 
 const sendConnectionRequest = async (req, res) => {
   try {
@@ -10,6 +11,13 @@ const sendConnectionRequest = async (req, res) => {
 
     if (!isValidObjectId(toUserId)) {
       return res.status(400).json({ message: "receiver id is not valid" });
+    }
+
+    const isCompany = await Company.findById(userId);
+    if (isCompany) {
+      return res
+        .status(400)
+        .json({ message: "company cannot send connection request" });
     }
 
     const DevlinkUser = await User.findById(toUserId);

@@ -13,6 +13,7 @@ import commentRoute from "./routes/comment.route.js";
 import highlightRoute from "./routes/highlight.route.js";
 import likeRoute from "./routes/like.route.js";
 import connectionRoute from "./routes/connection.route.js";
+import companyRoute from "./routes/company.route.js";
 
 app.use("/user", userRoute);
 app.use("/post", postRoute);
@@ -20,5 +21,6 @@ app.use("/comment", commentRoute);
 app.use("/highlight", highlightRoute);
 app.use("/like", likeRoute);
 app.use("/connection", connectionRoute);
+app.use("/company", companyRoute);
 
 export default app;
