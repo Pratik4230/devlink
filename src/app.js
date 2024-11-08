@@ -14,6 +14,8 @@ import highlightRoute from "./routes/highlight.route.js";
 import likeRoute from "./routes/like.route.js";
 import connectionRoute from "./routes/connection.route.js";
 import companyRoute from "./routes/company.route.js";
+import followRoute from "./routes/follower.route.js";
+import jobRoute from "./routes/job.route.js";
 
 app.use("/user", userRoute);
 app.use("/post", postRoute);
@@ -22,5 +24,7 @@ app.use("/highlight", highlightRoute);
 app.use("/like", likeRoute);
 app.use("/connection", connectionRoute);
 app.use("/company", companyRoute);
+app.use("/follow", followRoute);
+app.use("/job", jobRoute);
 
 export default app;

@@ -28,11 +28,11 @@ const jobSchema = new Schema(
     },
 
     minSalary: {
-      type: Number,
+      type: String,
       required: true,
     },
     maxSalary: {
-      type: Number,
+      type: String,
       required: true,
     },
 
@@ -44,6 +44,7 @@ const jobSchema = new Schema(
       type: String,
       enum: ["full-time", "part-time", "remote", "internship"],
       default: "full-time",
+      required: true,
     },
     status: {
       type: String,
