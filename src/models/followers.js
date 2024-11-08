@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-const followersSchema = new Schema(
+const followerSchema = new Schema(
   {
     follower: {
       type: Schema.Types.ObjectId,
@@ -16,6 +16,6 @@ const followersSchema = new Schema(
   { timestamps: true }
 );
 
-const followers = model("Followers", followersSchema);
+const Follower = model("Follower", followerSchema);
 
-export default followers;
+export default Follower;
