@@ -13,12 +13,13 @@ const jobApplicationSchema = new Schema(
       required: true,
     },
     resume: {
-      type: String,
-      required: true,
+      url: { type: String, required: true },
+      public_id: { type: String, required: true },
     },
+
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected"],
+      enum: ["pending", "accepted", "rejected", "viewed"],
       default: "pending",
     },
   },

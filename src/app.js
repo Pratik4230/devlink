@@ -16,6 +16,7 @@ import connectionRoute from "./routes/connection.route.js";
 import companyRoute from "./routes/company.route.js";
 import followRoute from "./routes/follower.route.js";
 import jobRoute from "./routes/job.route.js";
+import jobApplicationRoute from "./routes/jobapplication.route.js";
 
 app.use("/user", userRoute);
 app.use("/post", postRoute);
@@ -26,5 +27,6 @@ app.use("/connection", connectionRoute);
 app.use("/company", companyRoute);
 app.use("/follow", followRoute);
 app.use("/job", jobRoute);
+app.use("/jobapplication", jobApplicationRoute);
 
 export default app;
