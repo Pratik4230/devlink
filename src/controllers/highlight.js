@@ -8,8 +8,6 @@ const createHighlight = async (req, res) => {
 
     const ImagePath = req.file?.path;
 
-    console.log(ImagePath);
-
     if (!ImagePath) {
       return res.status(400).json({ message: "Please provide  Image" });
     }

@@ -90,13 +90,14 @@ const sendConnectionRequest = async (req, res) => {
 const acceptConnectionRequest = async (req, res) => {
   try {
     const { connectionId } = req.params;
+    const userId = req.user._id;
 
     if (!isValidObjectId(connectionId)) {
       return res.status(400).json({ message: "connection id is not valid " });
     }
 
     const connection = await Connection.findOneAndUpdate(
-      { _id: connectionId, status: "pending" },
+      { _id: connectionId, status: "pending", receiver: userId },
       { status: "connected" },
       { new: true }
     );
@@ -120,13 +121,14 @@ const acceptConnectionRequest = async (req, res) => {
 const rejectConnectionRequest = async (req, res) => {
   try {
     const { connectionId } = req.params;
+    const userId = req.user._id;
 
     if (!isValidObjectId(connectionId)) {
       return res.status(400).json({ message: "connection id is not Valid" });
     }
 
     const connection = await Connection.findOneAndUpdate(
-      { _id: connectionId, status: "pending" },
+      { _id: connectionId, status: "pending", receiver: userId },
       { status: "idle", rejectedAt: new Date() },
       { new: true }
     );

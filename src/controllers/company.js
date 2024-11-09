@@ -29,11 +29,8 @@ const removePassword = (company) => {
 const comapnyRegister = async (req, res) => {
   try {
     const { error } = validateCompany(req?.body);
-    console.log("body : ", req?.body);
 
     if (error) {
-      console.log("err", error);
-
       return res.status(400).json({ message: error.details[0].message });
     }
 
