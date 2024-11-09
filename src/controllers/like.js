@@ -146,6 +146,7 @@ const likeHighlight = async (req, res) => {
   }
 };
 
+// TODO
 const getLikedPosts = async (req, res) => {};
 
 export { likePost, likeComment, likeHighlight };

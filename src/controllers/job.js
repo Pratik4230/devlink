@@ -186,6 +186,7 @@ const toggleJobStatus = async (req, res) => {
   }
 };
 
+// TODO
 const getCompanyJobs = async (req, res) => {};
 
 export { createJob, updateJob, deleteJob, toggleJobStatus, getCompanyJobs };

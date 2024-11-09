@@ -124,6 +124,7 @@ const deleteComment = async (req, res) => {
   }
 };
 
+// TODO
 const getPostComments = async (req, res) => {
   const { postId } = req.params;
   if (!isValidObjectId(postId)) {

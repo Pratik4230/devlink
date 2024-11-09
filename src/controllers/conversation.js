@@ -96,6 +96,7 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+// TODO
 const getConversation = async (req, res) => {
   try {
     const { receiverId } = req.params;

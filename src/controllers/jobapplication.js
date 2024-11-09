@@ -71,6 +71,7 @@ const applyJob = async (req, res) => {
   }
 };
 
+// TODO
 const getAppliedJobs = async (req, res) => {};
 
 export { applyJob };

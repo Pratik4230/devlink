@@ -47,6 +47,7 @@ const toggleFollow = async (req, res) => {
   }
 };
 
+// TODO
 const getFollowers = async (req, res) => {};
 
 export { toggleFollow };

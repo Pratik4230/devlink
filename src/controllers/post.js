@@ -129,5 +129,6 @@ const deletePost = async (req, res) => {
   }
 };
 
+// TODO
 const getPosts = async (req, res) => {};
 export { createPost, updatePost, deletePost };

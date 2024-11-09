@@ -175,10 +175,11 @@ const removeConnection = async (req, res) => {
   }
 };
 
+// TODO
 const getConnections = async (req, res) => {};
-
+// TODO
 const getConnectionRequestsReceived = async (req, res) => {};
-
+// TODO
 const getConnectionRequestsSent = async (req, res) => {};
 
 export {
