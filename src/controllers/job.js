@@ -187,6 +187,30 @@ const toggleJobStatus = async (req, res) => {
 };
 
 // TODO
-const getCompanyJobs = async (req, res) => {};
+const getCompanyJobs = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    if (!isValidObjectId(companyId)) {
+      return res.status(400).json({ message: "company id is not valid" });
+    }
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const jobs = await Job.find({ company: companyId })
+      .populate("company", "companyName companySize locations website bio logo")
+      .select("-__v");
+    if (!jobs) {
+      return res.status(404).json({ message: "Jobs not found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Jobs found successfully", data: jobs });
+  } catch (error) {
+    console.log("getCompanyJobs error : ", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export { createJob, updateJob, deleteJob, toggleJobStatus, getCompanyJobs };

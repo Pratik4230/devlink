@@ -1,6 +1,6 @@
 import Comment from "../models/comment.model.js";
 import Post from "../models/post.model.js";
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 const addComment = async (req, res) => {
   try {
@@ -126,10 +126,86 @@ const deleteComment = async (req, res) => {
 
 // TODO
 const getPostComments = async (req, res) => {
-  const { postId } = req.params;
-  if (!isValidObjectId(postId)) {
-    return res.status(400).json({ message: "post id is not valid" });
+  try {
+    const { postId } = req.params;
+    const userId = req.user?._id;
+    if (!isValidObjectId(postId)) {
+      return res.status(400).json({ message: "post id is not valid" });
+    }
+
+    const isPostExist = await Post.findById(postId);
+    if (!isPostExist) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const comments = await Comment.aggregate([
+      {
+        $match: {
+          post: new mongoose.Types.ObjectId(postId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "users",
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "comment",
+          as: "likes",
+        },
+      },
+      {
+        $addFields: {
+          users: {
+            $first: "$users",
+          },
+          likeCount: {
+            $size: { $ifNull: ["$likes", []] },
+          },
+          isLiked: {
+            $cond: {
+              if: { $in: [userId, "$likes.likedBy"] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+
+      {
+        $project: {
+          content: 1,
+          _id: 1,
+          createdAt: 1,
+          likeCount: 1,
+          users: {
+            fullname: 1,
+            headline: 1,
+            _id: 1,
+            avatar: 1,
+          },
+          isLiked: 1,
+        },
+      },
+    ]);
+
+    if (!comments.length) {
+      return res.status(204).json({ message: "Comments not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Comments fetched successfully", data: comments });
+  } catch (error) {
+    console.log("getPostComments error : ", error.message);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
-export { addComment, updateComment, deleteComment };
+export { addComment, updateComment, deleteComment, getPostComments };

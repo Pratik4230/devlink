@@ -1,4 +1,4 @@
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import Connection from "../models/connection.model.js";
 import User from "../models/user.model.js";
 import Company from "../models/company.model.js";
@@ -176,15 +176,203 @@ const removeConnection = async (req, res) => {
 };
 
 // TODO
-const getConnections = async (req, res) => {};
+const getConnections = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    let connections = await Connection.aggregate([
+      {
+        $match: {
+          $or: [
+            { requester: new mongoose.Types.ObjectId(userId) },
+            { receiver: new mongoose.Types.ObjectId(userId) },
+          ],
+          status: "connected",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "requester",
+          foreignField: "_id",
+          as: "requester",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "receiver",
+          foreignField: "_id",
+          as: "receiver",
+        },
+      },
+      {
+        $unwind: "$requester",
+      },
+      {
+        $unwind: "$receiver",
+      },
+
+      {
+        $addFields: {
+          connectedUser: {
+            $cond: {
+              if: { $eq: ["$requester", userId] },
+              then: "$receiver",
+              else: "$requester",
+            },
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          createdAt: 1,
+          "connectedUser._id": 1,
+          "connectedUser.fullname": 1,
+          "connectedUser.avatar": 1,
+          "connectedUser.headline": 1,
+        },
+      },
+    ]);
+    console.log(connections);
+
+    // connections = connections.filter((connection) => {
+    //   console.log(
+    //     connection?.connectedUser?._id?.toString() == userId?.toString()
+    //   );
+    //   return connection?.connectedUser?._id?.toString() != userId?.toString();
+    // });
+
+    console.log("connections", connections);
+
+    if (!connections.length) {
+      return res.status(204).json({
+        message: "No connections found",
+      });
+    }
+
+    res
+      .status(200)
+      .json({ message: "connections found successfully", data: connections });
+  } catch (error) {
+    console.log("get connections error : ", error?.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 // TODO
-const getConnectionRequestsReceived = async (req, res) => {};
+const getConnectionRequestsReceived = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    let connectionsRequestsReceived = await Connection.aggregate([
+      {
+        $match: {
+          receiver: new mongoose.Types.ObjectId(userId),
+          status: "pending",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "requester",
+          foreignField: "_id",
+          as: "Requester",
+        },
+      },
+      {
+        $unwind: "$Requester",
+      },
+      {
+        $project: {
+          status: 1,
+          fullname: "$Requester.fullname",
+          headline: "$Requester.headline",
+          avatar: "$Requester.avatar",
+          RequesterId: "$Requester._id",
+          createdAt: 1,
+        },
+      },
+    ]);
+
+    if (!connectionsRequestsReceived.length) {
+      return res.status(204).json({
+        message: "No connections found",
+        data: [],
+      });
+    }
+
+    return res.status(200).json({
+      message: "connectionsRequestsReceived found successfully",
+      data: connectionsRequestsReceived,
+    });
+  } catch (error) {
+    console.log("get connection requests received error : ", error?.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 // TODO
-const getConnectionRequestsSent = async (req, res) => {};
+const getConnectionRequestsSent = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    let connectionsRequestsSent = await Connection.aggregate([
+      {
+        $match: {
+          requester: new mongoose.Types.ObjectId(userId),
+          status: "pending",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "receiver",
+          foreignField: "_id",
+          as: "Receiver",
+        },
+      },
+      {
+        $unwind: "$Receiver",
+      },
+      {
+        $project: {
+          status: 1,
+          fullname: "$Receiver.fullname",
+          headline: "$Receiver.headline",
+          avatar: "$Receiver.avatar",
+          receiverId: "$Receiver._id",
+          createdAt: 1,
+        },
+      },
+    ]);
+
+    if (!connectionsRequestsSent.length) {
+      return res.status(204).json({
+        message: "No connections found",
+        data: [],
+      });
+    }
+
+    return res.status(200).json({
+      message: "connectionsRequestsSent found successfully",
+      data: connectionsRequestsSent,
+    });
+  } catch (error) {
+    console.log("get connection requests sent error : ", error?.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export {
   sendConnectionRequest,
   acceptConnectionRequest,
   rejectConnectionRequest,
   removeConnection,
+  getConnections,
+  getConnectionRequestsReceived,
+  getConnectionRequestsSent,
 };

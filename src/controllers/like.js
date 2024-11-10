@@ -2,7 +2,7 @@ import Like from "../models/like.model.js";
 import Post from "../models/post.model.js";
 import Comment from "../models/comment.model.js";
 import Highlight from "../models/highlight.model.js";
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 const likePost = async (req, res) => {
   try {
@@ -147,6 +147,84 @@ const likeHighlight = async (req, res) => {
 };
 
 // TODO
-const getLikedPosts = async (req, res) => {};
+const getLikedPosts = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const Likedposts = await Like.aggregate([
+      {
+        $match: {
+          likedBy: new mongoose.Types.ObjectId(userId),
+        },
+      },
 
-export { likePost, likeComment, likeHighlight };
+      {
+        $lookup: {
+          from: "posts",
+          localField: "post",
+          foreignField: "_id",
+          as: "posts",
+        },
+      },
+      { $unwind: "$posts" },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "posts.author",
+          foreignField: "_id",
+          as: "postOwner",
+        },
+      },
+
+      {
+        $addFields: {
+          postOwner: {
+            $first: "$postOwner",
+          },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "likes",
+          localField: "posts._id",
+          foreignField: "post",
+          as: "likes",
+        },
+      },
+
+      {
+        $addFields: {
+          likes: {
+            $size: { $ifNull: ["$likes", []] },
+          },
+        },
+      },
+
+      {
+        $project: {
+          _id: 1,
+          likes: 1,
+          "posts._id": 1,
+          "posts.content": 1,
+          "posts.createdAt": 1,
+          "postOwner._id": 1,
+          "postOwner.fullname": 1,
+          "postOwner.headline": 1,
+          "postOwner.avatar": 1,
+        },
+      },
+    ]);
+
+    if (!Likedposts || Likedposts.length === 0) {
+      return res.status(204).json({ message: "No liked posts found" });
+    }
+
+    return res.status(200).json({ message: "Liked posts", Likedposts });
+  } catch (error) {
+    console.log("getLikedPosts error : ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { likePost, likeComment, likeHighlight, getLikedPosts };

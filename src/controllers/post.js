@@ -1,7 +1,7 @@
 import Company from "../models/company.model.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 const createPost = async (req, res) => {
   try {
@@ -130,5 +130,75 @@ const deletePost = async (req, res) => {
 };
 
 // TODO
-const getPosts = async (req, res) => {};
-export { createPost, updatePost, deletePost };
+const getUserPosts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!isValidObjectId(userId)) {
+      return res.status(400).json({ message: "user id is not valid" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const UserPosts = await Post.aggregate([
+      {
+        $match: {
+          author: new mongoose.Types.ObjectId(userId),
+        },
+      },
+
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "post",
+          as: "Like",
+        },
+      },
+
+      {
+        $addFields: {
+          likeCount: {
+            $size: "$Like",
+          },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "Author",
+        },
+      },
+      { $unwind: "$Author" },
+      {
+        $project: {
+          content: 1,
+          createdAt: 1,
+          likeCount: 1,
+          "Author.headline": 1,
+          "Author.fullname": 1,
+          "Author.avatar": 1,
+          "Author._id": 1,
+        },
+      },
+    ]);
+
+    if (!UserPosts || UserPosts.length === 0) {
+      return res.status(204).json({ message: "Posts not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Posts found successfully", data: UserPosts });
+  } catch (error) {
+    console.log("getPosts error : ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+export { createPost, updatePost, deletePost, getUserPosts };
