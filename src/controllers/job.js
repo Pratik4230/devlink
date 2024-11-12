@@ -213,4 +213,28 @@ const getCompanyJobs = async (req, res) => {
   }
 };
 
-export { createJob, updateJob, deleteJob, toggleJobStatus, getCompanyJobs };
+const getJobFeed = async (req, res) => {
+  try {
+    const jobs = await Job.find({ status: "active" })
+      .populate("company", "companyName companySize locations website bio logo")
+      .select("-__v");
+    if (!jobs) {
+      return res.status(404).json({ message: "Jobs not found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Jobs found successfully", data: jobs });
+  } catch (error) {
+    console.log("getJobFeed error : ", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export {
+  createJob,
+  updateJob,
+  deleteJob,
+  toggleJobStatus,
+  getCompanyJobs,
+  getJobFeed,
+};

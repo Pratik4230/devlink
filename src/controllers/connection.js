@@ -1,4 +1,4 @@
-import mongoose, { connect, isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import Connection from "../models/connection.model.js";
 import User from "../models/user.model.js";
 import Company from "../models/company.model.js";
@@ -198,17 +198,23 @@ const getConnections = async (req, res) => {
       const { _id, status, createdAt } = data;
       if (data.requester._id.toString() == userId.toString()) {
         return {
-          _id: _id,
+          connectionId: _id,
           status: status,
           createdAt: createdAt,
-          connectedTo: data.receiver,
+          fullname: data?.receiver?.fullname,
+          headline: data?.receiver?.headline,
+          avatar: data?.receiver?.avatar,
+          nextUserId: data?.receiver?._id,
         };
       }
       return {
-        _id: _id,
+        connectionId: _id,
         status: status,
         createdAt: createdAt,
-        connectedTo: data.requester,
+        fullname: data?.requester?.fullname,
+        headline: data?.requester?.headline,
+        avatar: data?.requester?.avatar,
+        nextUserId: data?.requester?._id,
       };
     });
 
@@ -251,8 +257,9 @@ const getConnectionRequestsReceived = async (req, res) => {
           fullname: "$Requester.fullname",
           headline: "$Requester.headline",
           avatar: "$Requester.avatar",
-          RequesterId: "$Requester._id",
+          nextUserId: "$Requester._id",
           createdAt: 1,
+          connectionId: "$_id",
         },
       },
     ]);
@@ -303,8 +310,9 @@ const getConnectionRequestsSent = async (req, res) => {
           fullname: "$Receiver.fullname",
           headline: "$Receiver.headline",
           avatar: "$Receiver.avatar",
-          receiverId: "$Receiver._id",
+          nextUserId: "$Receiver._id",
           createdAt: 1,
+          connectionId: "$_id",
         },
       },
     ]);

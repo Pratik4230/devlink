@@ -6,12 +6,14 @@ import User, {
 } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 
+import Post from "../models/post.model.js";
+
 import jwt from "jsonwebtoken";
 
 const tokenOptions = {
   httpOnly: true,
   secure: false,
-  sameSite: "None",
+  sameSite: "Lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
@@ -129,12 +131,10 @@ const getProfile = async (req, res) => {
 
     const userWithoutPassword = removePassword(user);
 
-    return res
-      .status(200)
-      .json({
-        message: "Profile fetched successfully",
-        data: userWithoutPassword,
-      });
+    return res.status(200).json({
+      message: "Profile fetched successfully",
+      data: userWithoutPassword,
+    });
   } catch (error) {
     console.log("getProfile error : ", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -297,6 +297,104 @@ const addExperience = async (req, res) => {
   }
 };
 
+const myProfile = async (req, res) => {
+  try {
+    const userId = req?.user?._id;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userWithoutPassword = removePassword(user);
+
+    return res.status(200).json({
+      message: "Profile fetched successfully",
+      data: userWithoutPassword,
+    });
+  } catch (error) {
+    console.log("getProfile error : ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getFeed = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const posts = await Post.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDetails",
+        },
+      },
+      {
+        $unwind: "$authorDetails",
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "post",
+          as: "likes",
+        },
+      },
+      {
+        $addFields: {
+          likeCount: { $size: { $ifNull: ["$likes", []] } },
+          isLiked: {
+            $cond: {
+              if: { $in: [userId, "$likes.likedBy"] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          content: 1,
+          createdAt: 1,
+          likeCount: 1,
+          isLiked: 1,
+          author: {
+            _id: "$authorDetails._id",
+            fullname: "$authorDetails.fullname",
+            headline: "$authorDetails.headline",
+            avatar: "$authorDetails.avatar",
+          },
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    if (!posts.length) {
+      return res.status(204).json({ message: "No posts found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Feed fetched successfully", data: posts });
+  } catch (error) {
+    console.log("getFeed error: ", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export {
   register,
   login,
@@ -307,4 +405,6 @@ export {
   updateSkills,
   addEducation,
   addExperience,
+  myProfile,
+  getFeed,
 };
