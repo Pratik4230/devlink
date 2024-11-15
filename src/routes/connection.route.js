@@ -12,6 +12,7 @@ import {
   getConnections,
   getConnectionRequestsReceived,
   getConnectionRequestsSent,
+  getUsersFeed,
 } from "../controllers/connection.js";
 
 router.use(authCheck);
@@ -23,5 +24,6 @@ router.route("/remove/:connectionId").delete(removeConnection);
 router.route("/connections").get(getConnections);
 router.route("/requestsreceived").get(getConnectionRequestsReceived);
 router.route("/requestssent").get(getConnectionRequestsSent);
+router.route("/feed").get(getUsersFeed);
 
 export default router;

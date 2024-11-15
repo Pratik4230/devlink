@@ -14,12 +14,7 @@ const connectionSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["idle", "pending", "connected"],
-      default: "idle",
-    },
-    rejectedAt: {
-      type: Date,
-      default: null,
+      enum: ["pending", "connected"],
     },
   },
   { timestamps: true }

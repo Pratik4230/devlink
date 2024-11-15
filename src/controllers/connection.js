@@ -7,7 +7,6 @@ const sendConnectionRequest = async (req, res) => {
   try {
     const userId = req.user?._id;
     const { toUserId } = req.params;
-    const SevenDays = 7 * 24 * 60 * 60 * 60 * 1000;
 
     if (!isValidObjectId(toUserId)) {
       return res.status(400).json({ message: "receiver id is not valid" });
@@ -29,21 +28,6 @@ const sendConnectionRequest = async (req, res) => {
       return res
         .status(400)
         .json({ message: "cannot send connection request to Yourself" });
-    }
-
-    const recentlyRejected = await Connection.findOne({
-      $or: [
-        { requester: userId, receiver: toUserId },
-        { requester: toUserId, receiver: userId },
-      ],
-      status: "idle",
-      rejectedAt: { $gte: new Date(Date.now() - SevenDays) },
-    });
-
-    if (recentlyRejected) {
-      return res.status(403).json({
-        message: `Cannot send connection request to ${DevlinkUser?.fullname}  within 7 days`,
-      });
     }
 
     const alreadyConnected = await Connection.findOne({
@@ -127,11 +111,11 @@ const rejectConnectionRequest = async (req, res) => {
       return res.status(400).json({ message: "connection id is not Valid" });
     }
 
-    const connection = await Connection.findOneAndUpdate(
-      { _id: connectionId, status: "pending", receiver: userId },
-      { status: "idle", rejectedAt: new Date() },
-      { new: true }
-    );
+    const connection = await Connection.findOneAndDelete({
+      _id: connectionId,
+      status: "pending",
+      receiver: userId,
+    });
 
     if (!connection) {
       return res
@@ -157,9 +141,11 @@ const removeConnection = async (req, res) => {
       return res.status(400).json({ message: "connection id is not Valid" });
     }
 
+    const allowedStatus = ["connected", "pending"];
+
     const connection = await Connection.findOneAndDelete({
       _id: connectionId,
-      status: "connected",
+      status: { $in: allowedStatus },
     });
 
     if (!connection) {
@@ -334,6 +320,37 @@ const getConnectionRequestsSent = async (req, res) => {
   }
 };
 
+const getUsersFeed = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const connectionsRequests = await Connection.find({
+      $or: [{ requester: userId }, { receiver: userId }],
+    });
+
+    const ingnoreUsersFromFedd = new Set();
+    connectionsRequests.forEach((connection) => {
+      ingnoreUsersFromFedd.add(connection.requester.toString());
+      ingnoreUsersFromFedd.add(connection.receiver.toString());
+    });
+
+    const users = await User.find({
+      $and: [
+        { _id: { $ne: userId } },
+        { _id: { $nin: Array.from(ingnoreUsersFromFedd) } },
+      ],
+    }).select("fullname avatar headline _id education");
+
+    return res.status(200).json({
+      message: "users found successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.log("get users feed error : ", error?.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export {
   sendConnectionRequest,
   acceptConnectionRequest,
@@ -342,4 +359,5 @@ export {
   getConnections,
   getConnectionRequestsReceived,
   getConnectionRequestsSent,
+  getUsersFeed,
 };
