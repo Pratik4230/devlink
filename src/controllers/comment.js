@@ -177,7 +177,11 @@ const getPostComments = async (req, res) => {
           },
         },
       },
-
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
       {
         $project: {
           content: 1,
