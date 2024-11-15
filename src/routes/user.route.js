@@ -8,10 +8,7 @@ import {
   logout,
   getProfile,
   updatePassword,
-  updateHeadlineLocation,
-  updateSkills,
-  addEducation,
-  addExperience,
+  updateUserProfile,
   myProfile,
   getFeed,
 } from "../controllers/user.js";
@@ -25,10 +22,7 @@ router.route("/auth").get(authCheck, myProfile);
 
 router.route("/profile/:userId").get(authCheck, getProfile);
 router.route("/updatepassword").put(authCheck, updatePassword);
-router.route("/headlinelocation").put(authCheck, updateHeadlineLocation);
-router.route("/updateskills").put(authCheck, updateSkills);
-router.route("/addeducation").post(authCheck, addEducation);
-router.route("/addexperience").post(authCheck, addExperience);
+router.route("/update").put(authCheck, updateUserProfile);
 
 router.route("/feed").get(authCheck, getFeed);
 

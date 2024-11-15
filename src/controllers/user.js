@@ -171,24 +171,22 @@ const updatePassword = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
-const updateHeadlineLocation = async (req, res) => {
+const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user?._id;
-    const { headline, location } = req.body;
-
-    if (!headline && !location) {
-      return res
-        .status(400)
-        .json({ message: "Please provide at least one field" });
-    }
+    const { headline, location, skills, education, experience } = req.body;
 
     if (!userId) {
       return res.status(401).json({ message: "Login first" });
     }
 
-    const user = await User.findById(userId);
+    if (!headline && !location && !skills && !education && !experience) {
+      return res
+        .status(400)
+        .json({ message: "Please provide at least one field" });
+    }
 
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -201,98 +199,33 @@ const updateHeadlineLocation = async (req, res) => {
       user.location = location;
     }
 
+    if (skills) {
+      user.skills = skills;
+    }
+
+    if (education) {
+      const { error } = validateEducation(education);
+      if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+      }
+      user.education = education;
+    }
+
+    if (experience) {
+      const { error } = validateExperience(experience);
+      if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+      }
+      user.experience = experience;
+    }
+
     await user.save();
 
-    return res
-      .status(200)
-      .json({ message: "Headline and location updated successfully" });
+    console.log("user updated", user);
+
+    return res.status(200).json({ message: "Profile updated successfully" });
   } catch (error) {
-    console.log("updateHeadlineLocation error", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const updateSkills = async (req, res) => {
-  try {
-    const userId = req.user?._id;
-    const { skills } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Login first" });
-    }
-
-    if (!skills) {
-      return res
-        .status(400)
-        .json({ message: "Please provide at least one skill" });
-    }
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    user.skills = skills;
-    await user.save();
-
-    return res.status(200).json({ message: "Skills updated successfully" });
-  } catch (error) {
-    console.log("updateSkills error", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const addEducation = async (req, res) => {
-  try {
-    const userId = req.user?._id;
-    const newEducation = req.body;
-
-    const { error } = validateEducation(newEducation);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { education: newEducation },
-      { new: true, runValidators: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({ message: "Education added successfully" });
-  } catch (error) {
-    console.log("addEducation error", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const addExperience = async (req, res) => {
-  try {
-    const userId = req.user?._id;
-    const newExperience = req.body;
-
-    const { error } = validateExperience(newExperience);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { experience: newExperience },
-      { new: true, runValidators: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({ message: "Experience added successfully" });
-  } catch (error) {
-    console.log("addExperience error", error);
+    console.log("updateUserProfile error", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -361,6 +294,11 @@ const getFeed = async (req, res) => {
         },
       },
       {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+      {
         $project: {
           content: 1,
           createdAt: 1,
@@ -401,10 +339,7 @@ export {
   logout,
   getProfile,
   updatePassword,
-  updateHeadlineLocation,
-  updateSkills,
-  addEducation,
-  addExperience,
+  updateUserProfile,
   myProfile,
   getFeed,
 };
