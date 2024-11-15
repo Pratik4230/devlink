@@ -162,7 +162,16 @@ const getUserPosts = async (req, res) => {
       {
         $addFields: {
           likeCount: {
-            $size: "$Like",
+            $size: { $ifNull: ["$Like", []] },
+          },
+          isLiked: {
+            $cond: {
+              if: {
+                $in: [new mongoose.Types.ObjectId(userId), "$Like.likedBy"],
+              },
+              then: true,
+              else: false,
+            },
           },
         },
       },
@@ -172,19 +181,20 @@ const getUserPosts = async (req, res) => {
           from: "users",
           localField: "author",
           foreignField: "_id",
-          as: "Author",
+          as: "author",
         },
       },
-      { $unwind: "$Author" },
+      { $unwind: "$author" },
       {
         $project: {
           content: 1,
           createdAt: 1,
           likeCount: 1,
-          "Author.headline": 1,
-          "Author.fullname": 1,
-          "Author.avatar": 1,
-          "Author._id": 1,
+          isLiked: 1,
+          "author.headline": 1,
+          "author.fullname": 1,
+          "author.avatar": 1,
+          "author._id": 1,
         },
       },
     ]);
