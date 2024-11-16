@@ -18,6 +18,16 @@ const sendMessage = async (req, res) => {
         .json({ message: "cannot send message to yourself" });
     }
 
+    if (
+      !content ||
+      typeof content !== "string" ||
+      content.trim().length === 0
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Message content cannot be empty" });
+    }
+
     const isUser = await User.findById(receiverId);
     if (!isUser) {
       return res.status(404).json({ message: "receiver not found" });
@@ -119,7 +129,9 @@ const getConversation = async (req, res) => {
       .populate("messages.sender", "fullname email");
 
     if (!conversation) {
-      return res.status(404).json({ message: "conversation not found" });
+      return res
+        .status(204)
+        .json({ message: "conversation not found", data: [] });
     }
 
     return res.status(200).json({

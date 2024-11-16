@@ -19,6 +19,8 @@ const conversationSchema = new Schema(
         content: {
           type: String,
           required: true,
+          trim: true,
+          maxlength: 1000,
         },
       },
     ],

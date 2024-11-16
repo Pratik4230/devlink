@@ -13,6 +13,6 @@ router.use(authCheck);
 
 router.route("/send/:receiverId").post(sendMessage);
 router.route("/delete/:messageId").delete(deleteMessage);
-router.route("/conversaton/:receiverId").get(getConversation);
+router.route("/conversation/:receiverId").get(getConversation);
 
 export default router;
