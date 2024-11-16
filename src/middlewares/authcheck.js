@@ -27,8 +27,10 @@ const authCheck = async (req, res, next) => {
 
   if (!user) {
     req.user = company;
+
     return next();
   }
+
   req.user = user;
 
   next();

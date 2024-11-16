@@ -10,7 +10,7 @@ import {
 const tokenOptions = {
   httpOnly: true,
   secure: false,
-  sameSite: "None",
+  sameSite: "Lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
