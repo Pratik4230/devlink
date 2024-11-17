@@ -129,7 +129,32 @@ const companyLogout = async (req, res) => {
 const companyProfile = async (req, res) => {
   try {
     const { companyId } = req.params;
-    console.log("companyId : ", companyId);
+    // console.log("companyId : ", companyId);
+
+    if (!isValidObjectId(companyId)) {
+      return res.status(400).json({ message: "company id is not valid" });
+    }
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "company not found" });
+    }
+
+    const companyWithoutPassword = removePassword(company);
+
+    return res
+      .status(200)
+      .json({ message: "company profile", data: companyWithoutPassword });
+  } catch (error) {
+    console.log("company profile error : ", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const myCompanyProfile = async (req, res) => {
+  try {
+    const companyId = req.user._id;
+    // console.log("companyId : ", companyId);
 
     if (!isValidObjectId(companyId)) {
       return res.status(400).json({ message: "company id is not valid" });
@@ -191,4 +216,5 @@ export {
   companyLogout,
   companyProfile,
   updateCompanyData,
+  myCompanyProfile,
 };
