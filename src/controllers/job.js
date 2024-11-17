@@ -59,60 +59,6 @@ const createJob = async (req, res) => {
   }
 };
 
-const updateJob = async (req, res) => {
-  try {
-    const { jobId } = req.params;
-
-    if (!isValidObjectId(jobId)) {
-      return res.status(400).json({ message: "job id is not valid" });
-    }
-
-    const {
-      title,
-      description,
-      location,
-      requirements,
-      skills,
-      minSalary,
-      maxSalary,
-      type,
-      status,
-    } = req.body;
-
-    const isCompany = await Company.findById(req.user._id);
-    if (!isCompany) {
-      return res.status(404).json({ message: "only Company can update job" });
-    }
-
-    const job = await Job.findByIdAndUpdate(
-      { _id: jobId },
-      {
-        title,
-        description,
-        location,
-        requirements,
-        skills,
-        minSalary,
-        maxSalary,
-        type,
-        status,
-      },
-      { new: true }
-    );
-
-    if (!job) {
-      return res.status(404).json({ message: "Job not found" });
-    }
-
-    return res
-      .status(200)
-      .json({ message: "Job updated successfully", data: job });
-  } catch (error) {
-    console.log("job update error : ", error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 const deleteJob = async (req, res) => {
   try {
     const { jobId } = req.params;
@@ -230,11 +176,4 @@ const getJobFeed = async (req, res) => {
   }
 };
 
-export {
-  createJob,
-  updateJob,
-  deleteJob,
-  toggleJobStatus,
-  getCompanyJobs,
-  getJobFeed,
-};
+export { createJob, deleteJob, toggleJobStatus, getCompanyJobs, getJobFeed };
