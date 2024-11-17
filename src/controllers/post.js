@@ -15,24 +15,16 @@ const createPost = async (req, res) => {
         .json({ message: "Please provide content or Image" });
     }
 
-    let authorId;
-
     const user = await User.findById(userId);
-    if (user) {
-      authorId = user?._id;
-    }
-    const company = await Company.findById(userId);
-    if (company) {
-      authorId = company?._id;
-    }
-    if (!user && !company) {
+
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const post = new Post({
       content,
       Image,
-      author: authorId,
+      author: userId,
     });
 
     if (!post) {

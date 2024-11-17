@@ -9,10 +9,7 @@ const postSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    company: {
-      type: Schema.Types.ObjectId,
-      ref: "Company",
-    },
+
     Image: {
       type: String,
     },

@@ -127,7 +127,6 @@ const getJobApplications = async (req, res) => {
           "applicant.avatar.url": 1,
           "JobDetails.title": 1,
           "JobDetails.type": 1,
-          "JobDetails.status": 1,
           "JobDetails._id": 1,
           "JobDetails.requirements": 1,
         },
