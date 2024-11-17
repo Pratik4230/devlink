@@ -1,4 +1,4 @@
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import Job from "../models/job.model.js";
 import JobApplication from "../models/jobAppilication.model.js";
 import User from "../models/user.model.js";
@@ -72,6 +72,80 @@ const applyJob = async (req, res) => {
 };
 
 // TODO
-const getAppliedJobs = async (req, res) => {};
+const getJobApplications = async (req, res) => {
+  try {
+    const companyId = req.user._id;
 
-export { applyJob };
+    const { jobId } = req.params;
+
+    if (!isValidObjectId(jobId)) {
+      return res.status(400).json({ message: "job id is not valid" });
+    }
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    const jobApplications = await JobApplication.aggregate([
+      {
+        $match: {
+          job: new mongoose.Types.ObjectId(jobId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "applicant",
+          foreignField: "_id",
+          as: "applicant",
+        },
+      },
+      {
+        $lookup: {
+          from: "jobs",
+          localField: "job",
+          foreignField: "_id",
+          as: "JobDetails",
+        },
+      },
+      {
+        $unwind: "$JobDetails",
+      },
+      {
+        $unwind: "$applicant",
+      },
+      {
+        $project: {
+          status: 1,
+          createdAt: 1,
+          "resume.url": 1,
+          "applicant.fullname": 1,
+          "applicant.headline": 1,
+          "applicant._id": 1,
+          "applicant.email": 1,
+          "applicant.avatar.url": 1,
+          "JobDetails.title": 1,
+          "JobDetails.type": 1,
+          "JobDetails.status": 1,
+          "JobDetails._id": 1,
+          "JobDetails.requirements": 1,
+        },
+      },
+    ]);
+
+    if (!jobApplications || !jobApplications.length) {
+      return res.status(204).json({ message: "No job applications found" });
+    }
+
+    return res.status(200).json({
+      message: "Job applications found successfully",
+      data: jobApplications,
+    });
+  } catch (error) {
+    console.log("job application error : ", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { applyJob, getJobApplications };
