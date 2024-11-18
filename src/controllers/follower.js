@@ -29,7 +29,7 @@ const toggleFollow = async (req, res) => {
     if (alreadyFollowed) {
       return res
         .status(200)
-        .json({ message: " unfollow ", isFollowing: false });
+        .json({ message: " unfollowed ", isFollowing: false });
     }
 
     const follow = await Follower.create({
@@ -40,7 +40,7 @@ const toggleFollow = async (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    return res.status(200).json({ message: "follow", isFollowing: true });
+    return res.status(200).json({ message: "following", isFollowing: true });
   } catch (error) {
     console.log("toggleFollow error : ", error.message);
     return res.status(500).json({ message: "Internal server error" });

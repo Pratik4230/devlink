@@ -6,6 +6,7 @@ import {
   validateCompany,
   validateCompanyLogin,
 } from "../models/company.model.js";
+import Follower from "../models/followers.js";
 
 const tokenOptions = {
   httpOnly: true,
@@ -129,6 +130,7 @@ const companyLogout = async (req, res) => {
 const companyProfile = async (req, res) => {
   try {
     const { companyId } = req.params;
+    const userId = req.user?._id;
     // console.log("companyId : ", companyId);
 
     if (!isValidObjectId(companyId)) {
@@ -140,11 +142,17 @@ const companyProfile = async (req, res) => {
       return res.status(404).json({ message: "company not found" });
     }
 
+    const isFollowing = await Follower.exists({
+      following: companyId,
+      follower: userId,
+    });
+
     const companyWithoutPassword = removePassword(company);
 
-    return res
-      .status(200)
-      .json({ message: "company profile", data: companyWithoutPassword });
+    return res.status(200).json({
+      message: "company profile",
+      data: { ...companyWithoutPassword, isFollowing },
+    });
   } catch (error) {
     console.log("company profile error : ", error.message);
     return res.status(500).json({ message: "Internal server error" });
