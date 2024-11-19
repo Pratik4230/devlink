@@ -101,51 +101,6 @@ const likeComment = async (req, res) => {
   }
 };
 
-const likeHighlight = async (req, res) => {
-  try {
-    const { highlightId } = req.params;
-    const userId = req.user._id;
-
-    if (!isValidObjectId(highlightId)) {
-      return res.status(400).json({ message: "highlight id is not valid" });
-    }
-
-    if (!highlightId) {
-      return res.status(400).json({ message: "Highlight id is required" });
-    }
-
-    const highlight = await Highlight.findById(highlightId);
-    if (!highlight) {
-      return res.status(404).json({ message: "Highlight not found" });
-    }
-
-    const isLiked = await Like.findOne({
-      likedBy: userId,
-      highlight: highlightId,
-    });
-    if (isLiked) {
-      await Like.findByIdAndDelete(isLiked?._id);
-      return res
-        .status(200)
-        .json({ message: "Highlight unliked successfully", isLiked: false });
-    }
-
-    const like = new Like({
-      highlight: highlightId,
-      likedBy: userId,
-    });
-
-    like.save();
-
-    return res
-      .status(200)
-      .json({ message: "Highlight Liked successfully", isLiked: true });
-  } catch (error) {
-    console.log("Highlight like error", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 // TODO
 const getLikedPosts = async (req, res) => {
   try {
@@ -227,4 +182,4 @@ const getLikedPosts = async (req, res) => {
   }
 };
 
-export { likePost, likeComment, likeHighlight, getLikedPosts };
+export { likePost, likeComment, getLikedPosts };

@@ -1,6 +1,7 @@
 import Highlight from "../models/highlight.model.js";
-import { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { cloudinaryUpload, cloudinaryDelete } from "../utils/cloudinary.js";
+import Connection from "../models/connection.model.js";
 
 const createHighlight = async (req, res) => {
   try {
@@ -44,56 +45,6 @@ const createHighlight = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-const updateHighlight = async (req, res) => {
-  try {
-    const user = req?.user;
-    const { highlightId } = req.params;
-    const { content } = req.body;
-
-    if (!isValidObjectId(highlightId)) {
-      return res.status(400).json({ message: "highlight id is not valid" });
-    }
-
-    if (!content) {
-      return res.status(400).json({ message: "Please provide content" });
-    }
-
-    const highlight = await Highlight.findById(highlightId);
-    if (!highlight) {
-      return res.status(404).json({ message: "Highlight not found" });
-    }
-
-    if (highlight.author?.toString() != user?._id?.toString()) {
-      return res
-        .status(401)
-        .json({ message: "Only owner can update Highlight" });
-    }
-
-    const updatedhighlight = await Highlight.findByIdAndUpdate(
-      { _id: highlightId },
-      {
-        $set: {
-          content: content,
-        },
-      },
-      { new: true }
-    );
-
-    if (!updatedhighlight) {
-      return res
-        .status(500)
-        .json({ message: "failed to update highlight Please try again" });
-    }
-
-    return res.status(200).json({
-      message: "Highlight updated successfully",
-      data: updatedhighlight,
-    });
-  } catch (error) {
-    console.log("update Highlight error : ", error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
 
 const deleteHighlight = async (req, res) => {
   try {
@@ -130,4 +81,119 @@ const deleteHighlight = async (req, res) => {
   }
 };
 
-export { createHighlight, updateHighlight, deleteHighlight };
+const getHighlights = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const connectionHighlights = await Connection.aggregate([
+      {
+        $match: {
+          $or: [
+            { requester: new mongoose.Types.ObjectId(userId) },
+            { receiver: new mongoose.Types.ObjectId(userId) },
+          ],
+          status: "connected",
+        },
+      },
+
+      {
+        $addFields: {
+          connectedUser: {
+            $cond: {
+              if: { $eq: ["$requester", new mongoose.Types.ObjectId(userId)] },
+              then: "$receiver",
+              else: "$requester",
+            },
+          },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "highlights",
+          localField: "connectedUser",
+          foreignField: "author",
+          as: "highlights",
+        },
+      },
+
+      { $unwind: "$highlights" },
+
+      {
+        $match: {
+          "highlights.expiresAt": { $gte: new Date() },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "highlights.author",
+          foreignField: "_id",
+          as: "Author",
+        },
+      },
+
+      { $unwind: "$Author" },
+
+      {
+        $project: {
+          _id: 0,
+          highlightId: "$highlights._id",
+          content: "$highlights.content",
+          author: "$Author.fullname",
+          avatar: "$Author.avatar.url",
+          authorId: "$Author._id",
+          image: "$highlights.Image.url",
+          createdAt: "$highlights.createdAt",
+        },
+      },
+    ]);
+
+    const UserHighlights = await Highlight.aggregate([
+      {
+        $match: {
+          author: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "Author",
+        },
+      },
+
+      { $unwind: "$Author" },
+
+      {
+        $project: {
+          _id: 0,
+          highlightId: "$_id",
+          content: "$content",
+          author: "$Author.fullname",
+          avatar: "$Author.avatar.url",
+          authorId: "$Author._id",
+          image: "$Image.url",
+          createdAt: "$createdAt",
+        },
+      },
+    ]);
+
+    const highlights = [...connectionHighlights, ...UserHighlights];
+
+    if (!highlights || highlights?.length == 0) {
+      return res.status(204).json({ message: "No highlights found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Highlights found successfully", data: highlights });
+  } catch (error) {
+    console.log("error getting highlights", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { createHighlight, deleteHighlight, getHighlights };

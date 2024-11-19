@@ -6,10 +6,6 @@ const likeSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Comment",
     },
-    highlight: {
-      type: Schema.Types.ObjectId,
-      ref: "Highlight",
-    },
     post: {
       type: Schema.Types.ObjectId,
       ref: "Post",
