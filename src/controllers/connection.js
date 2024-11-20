@@ -339,7 +339,7 @@ const getUsersFeed = async (req, res) => {
         { _id: { $ne: userId } },
         { _id: { $nin: Array.from(ingnoreUsersFromFedd) } },
       ],
-    }).select("fullname avatar headline _id education");
+    }).select("fullname avatar headline _id education skills");
 
     return res.status(200).json({
       message: "users found successfully",
@@ -347,6 +347,38 @@ const getUsersFeed = async (req, res) => {
     });
   } catch (error) {
     console.log("get users feed error : ", error?.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const searchUsers = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({ message: "Search query cannot be empty" });
+    }
+
+    const searchRegex = new RegExp(query, "i");
+
+    const results = await User.find({
+      $or: [
+        { fullname: { $regex: searchRegex } },
+        { headline: { $regex: searchRegex } },
+        { skills: { $regex: searchRegex } },
+      ],
+    }).select("fullname avatar headline _id education skills");
+
+    if (results.length === 0) {
+      return res.status(204).json({ message: "No results found", data: [] });
+    }
+
+    return res.status(200).json({
+      message: "Search results fetched successfully",
+      data: results,
+    });
+  } catch (error) {
+    console.error("Search error:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -360,4 +392,5 @@ export {
   getConnectionRequestsReceived,
   getConnectionRequestsSent,
   getUsersFeed,
+  searchUsers,
 };
