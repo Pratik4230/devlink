@@ -92,8 +92,6 @@ const getFollowers = async (req, res) => {
       },
     ]);
 
-    console.log("followers : ", followers);
-
     if (!followers || !followers.length) {
       return res.status(204).json({ message: "No followers found" });
     }

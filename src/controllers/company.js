@@ -131,7 +131,6 @@ const companyProfile = async (req, res) => {
   try {
     const { companyId } = req.params;
     const userId = req.user?._id;
-    // console.log("companyId : ", companyId);
 
     if (!isValidObjectId(companyId)) {
       return res.status(400).json({ message: "company id is not valid" });
@@ -162,7 +161,6 @@ const companyProfile = async (req, res) => {
 const myCompanyProfile = async (req, res) => {
   try {
     const companyId = req.user._id;
-    // console.log("companyId : ", companyId);
 
     if (!isValidObjectId(companyId)) {
       return res.status(400).json({ message: "company id is not valid" });

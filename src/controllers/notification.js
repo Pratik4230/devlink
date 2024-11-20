@@ -10,7 +10,6 @@ const createNotification = async (reciptent, sender, type, content) => {
       content,
     });
     await notification.save();
-    console.log("notification created", notification);
   } catch (error) {
     console.log("notification creation error: ", error);
   }

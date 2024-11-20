@@ -10,8 +10,6 @@ const applyJob = async (req, res) => {
     const userId = req.user._id;
     const filePath = req.file?.path;
 
-    console.log("filePath", filePath);
-
     if (!filePath) {
       return res.status(400).json({ message: "Please provide a resume" });
     }
@@ -42,7 +40,6 @@ const applyJob = async (req, res) => {
     }
 
     const uploadResult = await cloudinaryUpload(filePath);
-    console.log("up res", uploadResult);
 
     if (!uploadResult) {
       return res
