@@ -109,8 +109,14 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    res.clearCookie("token");
-    return res.status(200).json({ message: "Logout successful" });
+    return res
+      .status(200)
+      .clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+      })
+      .json({ message: "Logout successful" });
   } catch (error) {
     console.log("logout error : ", error);
   }

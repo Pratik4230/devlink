@@ -16,7 +16,7 @@ import authCheck from "../middlewares/authcheck.js";
 
 router.route("/register").post(register);
 router.route("/login").post(login);
-router.route("/logout").post(logout);
+router.route("/logout").post(authCheck, logout);
 
 router.route("/auth").get(authCheck, myProfile);
 
