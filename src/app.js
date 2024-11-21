@@ -1,19 +1,9 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import "dotenv/config";
 
 const app = express();
-
-app.use((err, req, res, next) => {
-  if (err.code === "ECONNRESET") {
-    console.error("Network error: Connection reset by peer", err);
-    return res
-      .status(503)
-      .json({ message: "Service Unavailable, please try again later." });
-  }
-  console.error("Unhandled error:", err);
-  res.status(500).json({ message: "Internal Server Error" });
-});
 
 app.use(
   cors({
