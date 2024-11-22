@@ -262,7 +262,9 @@ const myProfile = async (req, res) => {
 const getFeed = async (req, res) => {
   try {
     const userId = req.user?._id;
-    const { page = 1, limit = 10 } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
     const skip = (page - 1) * limit;
 
     const posts = await Post.aggregate([
@@ -328,9 +330,16 @@ const getFeed = async (req, res) => {
       return res.status(204).json({ message: "No posts found" });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Feed fetched successfully", data: posts });
+    const totalPosts = await Post.countDocuments();
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    return res.status(200).json({
+      message: "Feed fetched successfully",
+      data: posts,
+      page,
+      totalPages,
+      totalPosts,
+    });
   } catch (error) {
     console.log("getFeed error: ", error.message);
     return res.status(500).json({ message: "Internal server error" });
