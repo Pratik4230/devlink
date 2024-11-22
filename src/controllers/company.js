@@ -119,8 +119,14 @@ const comapnyLogin = async (req, res) => {
 
 const companyLogout = async (req, res) => {
   try {
-    res.clearCookie("token");
-    return res.status(200).json({ message: "Logout successful" });
+    return res
+      .status(200)
+      .clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+      })
+      .json({ message: "Logout successful" });
   } catch (error) {
     console.log("company logout error : ", error.message);
     return res.status(500).json({ message: "Internal server error" });
