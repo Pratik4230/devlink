@@ -67,6 +67,7 @@ const register = async (req, res) => {
     return res.status(201).cookie("token", token, tokenOptions).json({
       message: "User created successfully.",
       data: userWithoutPassword,
+      token
     });
   } catch (error) {
     console.log("register error : ", error);
@@ -100,7 +101,7 @@ const login = async (req, res) => {
     return res
       .status(200)
       .cookie("token", token, tokenOptions)
-      .json({ message: "Login successful", data: userWithoutPassword });
+      .json({ message: "Login successful", data: userWithoutPassword , token });
   } catch (error) {
     console.log("login error : ", error);
     return res.status(500).json({ message: "Internal server error" });
