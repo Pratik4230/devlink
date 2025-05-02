@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import Company from "../models/company.model.js";
 
 const authCheck = async (req, res, next) => {
-  const { token } = req?.cookies;
+  const  token  = req.cookies.token ?? req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized 1" });
