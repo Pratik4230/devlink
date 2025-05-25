@@ -2,18 +2,51 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
+import axios from 'axios';
+import cron from 'node-cron';
 
 const app = express();
 
-app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGIN,
-    credentials: true,
-  })
-);
+
+ 
+var whitelist = ['http://localhost:5173', process.env.ALLOWED_ORIGIN]
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+  ,
+  credentials: true
+}
+
+ app.use(cors(corsOptions))
+
+// app.use(
+//   cors({
+//     origin: process.env.ALLOWED_ORIGIN,
+//     credentials: true,
+//   })
+// );
 
 app.use(express.json());
 app.use(cookieParser());
+
+
+// Cron Job: runs every 10 minutes
+cron.schedule('*/10 * * * *', async () => {
+  try {
+    console.log(' Sending request every 10 minutes...');
+    const response = await axios.get(process.env.SELF); 
+    console.log(' Response status:', response.status);
+  } catch (error) {
+    console.error(' Error sending request:', error.message);
+  }
+});
+
+
 
 // import routes
 import userRoute from "./routes/user.route.js";
