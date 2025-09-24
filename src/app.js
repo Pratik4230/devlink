@@ -35,16 +35,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-// Cron Job: runs every 10 minutes
-cron.schedule('*/10 * * * *', async () => {
-  try {
-    console.log(' Sending request every 10 minutes...');
-    const response = await axios.get(process.env.SELF); 
-    console.log(' Response status:', response.status);
-  } catch (error) {
-    console.error(' Error sending request:', error.message);
-  }
-});
+
 
 
 
