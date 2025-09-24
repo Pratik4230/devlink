@@ -2,34 +2,33 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
-import axios from 'axios';
-import cron from 'node-cron';
+
 
 const app = express();
 
 
  
-var whitelist = ['http://localhost:5173', process.env.ALLOWED_ORIGIN]
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-  ,
-  credentials: true
-}
+// var whitelist = ['http://localhost:5173', process.env.ALLOWED_ORIGIN]
+// var corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true)
+//     } else {
+//       callback(new Error('Not allowed by CORS'))
+//     }
+//   }
+//   ,
+//   credentials: true
+// }
 
- app.use(cors(corsOptions))
+//  app.use(cors(corsOptions))
 
-// app.use(
-//   cors({
-//     origin: process.env.ALLOWED_ORIGIN,
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGIN,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
